@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AgriSense AI - Advanced crop recommendation and farm decision support dashboard">
+  <title>AgriSense AI | Smart Crop Recommendation</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          boxShadow: {
+            glow: "0 0 35px rgba(16,185,129,.14)"
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+    <div class="flex items-center gap-3">
+      <div class="rounded-2xl bg-emerald-600 p-2.5 text-white shadow-lg shadow-emerald-600/20">
+        <i data-lucide="sprout"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-extrabold tracking-tight sm:text-xl">AgriSense <span class="text-emerald-600">AI</span></h1>
+        <p class="text-[10px] font-medium text-slate-500">Precision Farm Decision Support</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="themeBtn" class="icon-btn" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <button id="guideBtn" class="hidden rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 sm:flex sm:items-center sm:gap-2 dark:bg-emerald-950 dark:text-emerald-300">
+        <i data-lucide="book-open" class="h-4 w-4"></i> Guide
+      </button>
+      <button id="exportBtn" class="icon-btn" title="Export report"><i data-lucide="download"></i></button>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+
+  <section class="hero-panel overflow-hidden rounded-3xl p-6 text-white shadow-glow sm:p-8">
+    <div class="relative z-10 max-w-3xl">
+      <div class="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+        <span class="pulse-dot"></span> Smart Agriculture Dashboard
+      </div>
+      <h2 class="text-3xl font-extrabold tracking-tight sm:text-5xl">Make every acre count.</h2>
+      <p class="mt-3 max-w-2xl text-sm leading-6 text-emerald-50 sm:text-base">
+        Analyze soil, climate and crop conditions to generate transparent crop recommendations,
+        suitability scores and farm-risk indicators.
+      </p>
+    </div>
+    <div class="hero-orb"></div>
+  </section>
+
+  <section class="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div class="stat-card"><span class="stat-icon"><i data-lucide="target"></i></span><div><p>Top Match</p><strong id="topCrop">--</strong></div></div>
+    <div class="stat-card"><span class="stat-icon"><i data-lucide="percent"></i></span><div><p>Confidence</p><strong id="confidence">--%</strong></div></div>
+    <div class="stat-card"><span class="stat-icon"><i data-lucide="shield-check"></i></span><div><p>Risk Level</p><strong id="riskLevel">--</strong></div></div>
+    <div class="stat-card"><span class="stat-icon"><i data-lucide="layers-3"></i></span><div><p>Crops Evaluated</p><strong>10</strong></div></div>
+  </section>
+
+  <section class="grid gap-6 lg:grid-cols-5">
+
+    <div class="space-y-6 lg:col-span-2">
+      <div class="panel">
+        <div class="panel-title">
+          <div>
+            <h3>Farm Conditions</h3>
+            <p>Enter your current field parameters.</p>
+          </div>
+          <i data-lucide="sliders-horizontal" class="text-emerald-600"></i>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label>Season</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="season-btn active" data-season="Kharif">Kharif</button>
+              <button class="season-btn" data-season="Rabi">Rabi</button>
+              <button class="season-btn" data-season="Zaid">Zaid</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="soil">Soil Type</label>
+            <select id="soil" class="field">
+              <option>Alluvial</option><option>Clay</option><option>Loamy</option>
+              <option>Black</option><option>Red/Sandy</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div><label for="nitrogen">Nitrogen (N)</label><input id="nitrogen" class="field" type="number" value="90" min="0" max="200"></div>
+            <div><label for="phosphorus">Phosphorus (P)</label><input id="phosphorus" class="field" type="number" value="45" min="0" max="150"></div>
+            <div><label for="potassium">Potassium (K)</label><input id="potassium" class="field" type="number" value="50" min="0" max="200"></div>
+            <div><label for="ph">Soil pH</label><input id="ph" class="field" type="number" value="6.8" min="3" max="10" step="0.1"></div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div><label for="temperature">Temperature °C</label><input id="temperature" class="field" type="number" value="28" min="0" max="50"></div>
+            <div><label for="humidity">Humidity %</label><input id="humidity" class="field" type="number" value="70" min="0" max="100"></div>
+          </div>
+
+          <div>
+            <label for="rainfall">Annual Rainfall (mm)</label>
+            <input id="rainfall" class="field" type="number" value="1200" min="0" max="4000">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button class="preset-btn" data-preset="monsoon">🌧️ Monsoon</button>
+            <button class="preset-btn" data-preset="dry">☀️ Dry</button>
+            <button class="preset-btn" data-preset="winter">❄️ Winter</button>
+            <button class="preset-btn" data-preset="balanced">🌱 Balanced</button>
+          </div>
+
+          <button id="analyzeBtn" class="primary-btn w-full">
+            <i data-lucide="sparkles" class="h-5 w-5"></i> Analyze Farm
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <div><h3>Field Health</h3><p>Quick interpretation of your inputs.</p></div>
+          <i data-lucide="activity" class="text-emerald-600"></i>
+        </div>
+        <div id="healthBars" class="space-y-4"></div>
+      </div>
+    </div>
+
+    <div class="space-y-6 lg:col-span-3">
+      <div class="panel">
+        <div class="panel-title">
+          <div><h3>Suitability Analytics</h3><p>Relative compatibility across evaluated crops.</p></div>
+          <span class="badge">LIVE</span>
+        </div>
+        <div class="chart-wrap"><canvas id="cropChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <div class="mb-4 flex items-center justify-between">
+          <div><h3 class="text-lg font-bold">Recommended Crops</h3><p class="text-xs text-slate-500">Ranked by calculated suitability.</p></div>
+          <span id="resultCount" class="badge">10 results</span>
+        </div>
+        <div id="recommendations" class="space-y-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 md:grid-cols-2">
+    <div class="panel">
+      <div class="panel-title"><div><h3>Why This Recommendation?</h3><p>Transparent scoring factors for the top crop.</p></div><i data-lucide="brain-circuit" class="text-emerald-600"></i></div>
+      <div id="explanation" class="space-y-3"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><div><h3>Farm Risk Monitor</h3><p>Rule-based alerts based on your inputs.</p></div><i data-lucide="triangle-alert" class="text-amber-500"></i></div>
+      <div id="risks" class="space-y-3"></div>
+    </div>
+  </section>
+
+</main>
+
+<div id="guideModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xl font-bold">AgriSense Guide</h3>
+      <button id="closeGuide" class="icon-btn"><i data-lucide="x"></i></button>
+    </div>
+    <div class="mt-5 space-y-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
+      <p><b>Suitability:</b> The application uses a transparent weighted rule system rather than claiming to be a trained ML model.</p>
+      <p><b>Soil:</b> Soil type and pH influence crop compatibility.</p>
+      <p><b>Climate:</b> Temperature, humidity and rainfall are compared with crop-specific ranges.</p>
+      <p><b>Nutrients:</b> N/P/K values are used as additional field-health indicators and scoring signals.</p>
+      <p class="rounded-xl bg-amber-50 p-3 text-amber-800 dark:bg-amber-950 dark:text-amber-200"><b>Important:</b> This is a decision-support prototype. Real farm decisions should use local agronomy advice and laboratory soil/weather data.</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
